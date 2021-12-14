@@ -32,7 +32,7 @@ class SponsorSerializer(serializers.ModelSerializer):
 
     def get_spent_money(self, sponsor):
         spent_money = sponsor.sponsorships.aggregate(money_sum=Coalesce(Sum('money'), 0))['money_sum']
-        return spent_money if spent_money else 0
+        return spent_money
 
     def validate_company_name(self, value):
         if self.initial_data.get('person_type') == 'juridic':
