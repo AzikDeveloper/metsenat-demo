@@ -66,9 +66,9 @@ class StudentSerializer(serializers.ModelSerializer):
 
 class SponsorshipSerializer(serializers.ModelSerializer):
     student = StudentSerializer(read_only=True)
-    student_id = serializers.IntegerField(allow_null=False, required=True)
+    student_id = serializers.IntegerField(allow_null=False, required=True, write_only=True)
     sponsor = SponsorSerializer(read_only=True)
-    sponsor_id = serializers.IntegerField(allow_null=False, required=True)
+    sponsor_id = serializers.IntegerField(allow_null=False, required=True, write_only=True)
 
     class Meta:
         model = Sponsorship

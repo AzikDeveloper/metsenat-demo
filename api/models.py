@@ -18,7 +18,7 @@ class Sponsor(models.Model):
     person_type = models.CharField(max_length=16, choices=PERSON_CHOICES, null=True)
     company_name = models.CharField(max_length=256, null=True, blank=True)
     status = models.CharField(max_length=64, choices=STATUS_CHOICES, default='new')
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.full_name if self.full_name else super().__str__()
@@ -46,7 +46,7 @@ class Student(models.Model):
     university = models.ForeignKey(University, related_name='students', on_delete=models.SET_NULL, null=True)
     degree = models.CharField(max_length=64, choices=DEGREE_CHOICES, null=True)
     contract = models.BigIntegerField(null=True)
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.full_name if self.full_name else super().__str__()
@@ -56,6 +56,7 @@ class Sponsorship(models.Model):
     sponsor = models.ForeignKey(Sponsor, related_name='sponsorships', on_delete=models.SET_NULL, null=True)
     student = models.ForeignKey(Student, related_name='sponsorships', on_delete=models.CASCADE, null=True)
     money = models.BigIntegerField(null=True)
+    date_created = models.DateField(auto_now_add=True)
 
     def __str__(self):
         try:
