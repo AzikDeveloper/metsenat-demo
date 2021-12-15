@@ -16,7 +16,7 @@ class SponsorView(generics.ListCreateAPIView):
     queryset = Sponsor.objects.all()
     serializer_class = serializers.SponsorSerializer
     filter_backends = [DateRangeFilterBackend, SearchFilter, DjangoFilterBackend]
-    search_filters = ['full_name', 'company_name']
+    search_fields = ['full_name', 'company_name']
     filterset_fields = ['money', 'status']
     date_range_filter_field = 'date_created'
 
@@ -49,7 +49,6 @@ class SponsorshipView(generics.ListCreateAPIView):
     serializer_class = serializers.SponsorshipSerializer
     filter_backends = [DateRangeFilterBackend, SearchFilter, DjangoFilterBackend]
     search_fields = ['sponsor__full_name', 'sponsor__company_name', 'student__full_name']
-    filterset_fields = ['student_id']
     date_range_filter_field = 'date_created'
 
 
