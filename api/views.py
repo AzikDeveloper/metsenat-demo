@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAdminUser
 from . import serializers
 from .permissions import IsAdminOrCreateOnly
 from .models import *
-
+from django.db.models.functions import Coalesce
 from django.db import models
 
 
@@ -56,10 +56,10 @@ class DashboardView(APIView):
         total_needed_money = total_contract_money - total_sponsored_money
 
         sponsors = Sponsor.objects.extra({'date_created': "date(date_created)"}).values('date_created').annotate(
-            count=models.Count('id'))
+            count=models.Count('id')).values_list('date_created', 'count')
         students = Student.objects.extra({'date_created': "date(date_created)"}).values('date_created').annotate(
-            count=models.Count('id'))
-
+            count=models.Count('id')).values_list('date_created', 'count')
+        print(sponsors.query)
         return Response(data={
             'money_stats': {
                 'total_sponsored_money': total_sponsored_money,
