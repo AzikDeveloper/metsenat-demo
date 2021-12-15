@@ -1,8 +1,4 @@
 from django.db import models
-from rest_framework.validators import ValidationError
-
-
-# Create your models here.
 
 
 class Sponsor(models.Model):

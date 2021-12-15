@@ -5,12 +5,14 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from .views import *
 
 urlpatterns = [
-    path('sponsors', SponsorsView.as_view()),
+    path('sponsors', SponsorView.as_view()),
     path('sponsors/<int:pk>', SponsorDetailView.as_view()),
-    path('students', StudentsView.as_view()),
+    path('students', StudentView.as_view()),
     path('students/<int:pk>', StudentDetailView.as_view()),
     path('sponsorships', SponsorshipView.as_view()),
     path('sponsorships/<int:pk>', SponsorshipDetailView.as_view()),
+    path('universities', UniversityView.as_view()),
+    path('universities/<int:pk>', UniversityDetailView.as_view()),
     path('dashboard', DashboardView.as_view())
 ]
 

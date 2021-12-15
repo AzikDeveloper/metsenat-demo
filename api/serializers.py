@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from .models import Sponsor, Student, University, Sponsorship
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.db.models.functions import Coalesce
 from rest_framework.validators import ValidationError
 from django.shortcuts import get_object_or_404
+from .validators import validate_positive
 
 
 class UniversitySerializer(serializers.ModelSerializer):
@@ -21,7 +22,7 @@ class SponsorSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'full_name': {'allow_null': False, 'required': True},
             'phone_number': {'allow_null': False, 'required': True},
-            'money': {'allow_null': False, 'required': True},
+            'money': {'allow_null': False, 'required': True, 'validators': [validate_positive]},
             'person_type': {'allow_null': False, 'required': True}
         }
 
@@ -54,7 +55,7 @@ class StudentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'full_name': {'allow_null': False, 'required': True},
             'phone_number': {'allow_null': False, 'required': True},
-            'contract': {'allow_null': False, 'required': True},
+            'contract': {'allow_null': False, 'required': True, 'validators': [validate_positive]},
             'degree': {'allow_null': False, 'required': True},
         }
 
@@ -72,7 +73,7 @@ class SponsorshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sponsorship
         fields = ['id', 'student', 'student_id', 'sponsor', 'sponsor_id', 'money']
-        extra_kwargs = {'money': {'allow_null': False, 'required': True}}
+        extra_kwargs = {'money': {'allow_null': False, 'required': True, 'validators': [validate_positive]}}
 
     def update(self, instance, validated_data):
         sponsor = get_object_or_404(Sponsor, id=validated_data['sponsor_id'])
@@ -113,3 +114,20 @@ class SponsorshipSerializer(serializers.ModelSerializer):
                 raise ValidationError({'money': 'Homiylik puli kontrakt miqdoridan ochib ketdi'})
         else:
             raise ValidationError({'money': 'Homiyda buncha pul mavjud emas.'})
+
+
+class DashboardMoneySerializer:
+    def __init__(self):
+        self.total_sponsored_money = Sponsorship.objects.aggregate(Sum('money'))['money__sum']
+        self.total_contract_money = Student.objects.aggregate(Sum('contract'))['contract__sum']
+        self.total_needed_money = self.total_contract_money - self.total_sponsored_money
+
+
+class DashboardGraphSerializer:
+    def __init__(self):
+        self.sponsors_stats = Sponsor.objects.extra({'date_created': "date(date_created)"}).values(
+            'date_created').annotate(
+            count=Count('id')).values_list('date_created', 'count')
+        self.students_stats = Student.objects.extra({'date_created': "date(date_created)"}).values(
+            'date_created').annotate(
+            count=Count('id')).values_list('date_created', 'count')

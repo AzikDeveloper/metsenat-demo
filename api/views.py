@@ -1,75 +1,78 @@
 from rest_framework import generics
 from rest_framework.views import APIView
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from . import serializers
 from .permissions import IsAdminOrCreateOnly
 from .models import *
-from django.db.models.functions import Coalesce
-from django.db import models
 
 
-class SponsorsView(generics.ListCreateAPIView):
+class SponsorView(generics.ListCreateAPIView):
+    # permission_classes = [IsAdminOrCreateOnly]
     queryset = Sponsor.objects.all()
     serializer_class = serializers.SponsorSerializer
-    # permission_classes = [IsAdminOrCreateOnly]
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_filters = ['full_name', 'company_name']
     filterset_fields = ['money', 'status']
 
 
 class SponsorDetailView(generics.RetrieveUpdateDestroyAPIView):
+    # permission_classes = [IsAdminUser]
     queryset = Sponsor.objects.all()
     serializer_class = serializers.SponsorSerializer
+
+
+class StudentView(generics.ListCreateAPIView):
     # permission_classes = [IsAdminUser]
-
-
-class StudentsView(generics.ListCreateAPIView):
     queryset = Student.objects.all()
     serializer_class = serializers.StudentSerializer
-    # permission_classes = [IsAdminUser]
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['full_name']
     filterset_fields = ['degree', 'university']
 
 
 class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    # permission_classes = [IsAdminUser]
     queryset = Student.objects.all()
     serializer_class = serializers.StudentSerializer
-    # permission_classes = [IsAdminUser]
 
 
 class SponsorshipView(generics.ListCreateAPIView):
+    # permission_classes = [IsAdminOrCreateOnly]
     queryset = Sponsorship.objects.all()
     serializer_class = serializers.SponsorshipSerializer
-    # permission_classes = [IsAdminOrCreateOnly]
+    filter_backends = [SearchFilter]
+    search_fields = ['sponsor__full_name', 'sponsor__company_name', 'student__full_name']
 
 
 class SponsorshipDetailView(generics.RetrieveUpdateDestroyAPIView):
+    # permission_classes = [IsAdminOrCreateOnly]
     queryset = Sponsorship.objects.all()
     serializer_class = serializers.SponsorshipSerializer
-    # permission_classes = [IsAdminOrCreateOnly]
+
+
+class UniversityView(generics.ListCreateAPIView):
+    queryset = University.objects.all()
+    serializer_class = serializers.UniversitySerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+
+
+class UniversityDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = University.objects.all()
+    serializer_class = serializers.UniversitySerializer
 
 
 class DashboardView(APIView):
     # permission_classes = [IsAdminUser]
 
-    def get(self, request):
-        total_sponsored_money = Sponsorship.objects.aggregate(models.Sum('money'))['money__sum']
-        total_contract_money = Student.objects.aggregate(models.Sum('contract'))['contract__sum']
-        total_needed_money = total_contract_money - total_sponsored_money
-
-        sponsors = Sponsor.objects.extra({'date_created': "date(date_created)"}).values('date_created').annotate(
-            count=models.Count('id')).values_list('date_created', 'count')
-        students = Student.objects.extra({'date_created': "date(date_created)"}).values('date_created').annotate(
-            count=models.Count('id')).values_list('date_created', 'count')
-        print(sponsors.query)
+    @staticmethod
+    def get(request, *args, **kwargs):
+        dashboard_money_serializer = serializers.DashboardMoneySerializer()
+        dashboard_graph_serializer = serializers.DashboardGraphSerializer()
         return Response(data={
-            'money_stats': {
-                'total_sponsored_money': total_sponsored_money,
-                'total_contract_money': total_contract_money,
-                'total_needed_money': total_needed_money
-            },
-            'graph':
-                {
-                    'sponsors': sponsors,
-                    'students': students
-                }
-
+            'money_stats': dashboard_money_serializer.__dict__,
+            'graph_stats': dashboard_graph_serializer.__dict__
         })
