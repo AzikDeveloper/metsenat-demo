@@ -2,8 +2,6 @@ from rest_framework import serializers
 from .models import Sponsor, Student, University, Sponsorship
 from django.db.models import Sum, Count
 from django.db.models.functions import Coalesce
-from rest_framework.validators import ValidationError
-from django.shortcuts import get_object_or_404
 from .validators import (
     validate_positive,
     validate_sponsorship_money_on_update,
@@ -35,7 +33,8 @@ class SponsorSerializer(serializers.ModelSerializer):
         sponsor = Sponsor.objects.create(**validated_data)
         return sponsor
 
-    def get_spent_money(self, sponsor):
+    @staticmethod
+    def get_spent_money(sponsor):
         spent_money = sponsor.sponsorships.aggregate(money_sum=Coalesce(Sum('money'), 0))['money_sum']
         return spent_money
 
@@ -63,7 +62,8 @@ class StudentSerializer(serializers.ModelSerializer):
             'degree': {'allow_null': False, 'required': True},
         }
 
-    def get_gained_money(self, student):
+    @staticmethod
+    def get_gained_money(student):
         gained_money = student.sponsorships.aggregate(money_sum=Coalesce(Sum('money'), 0))['money_sum']
         return gained_money
 
