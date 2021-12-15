@@ -89,19 +89,35 @@ class SponsorshipSerializer(serializers.ModelSerializer):
 
 
 class SponsorshipsByStudentSerializer(serializers.ModelSerializer):
-    sponsor = SponsorSerializer()
+    sponsor = serializers.SerializerMethodField()
 
     class Meta:
         model = Sponsorship
-        fields = ['id', 'sponsor', 'student', 'money', 'date_created']
+        fields = ['id', 'sponsor', 'money']
+
+    @staticmethod
+    def get_sponsor(sponsorship):
+        data = {
+            'id': sponsorship.sponsor.id,
+            'full_name': sponsorship.sponsor.full_name
+        }
+        return data
 
 
 class SponsorshipsBySponsorSerializer(serializers.ModelSerializer):
-    student = StudentSerializer()
+    student = serializers.SerializerMethodField()
 
     class Meta:
         model = Sponsorship
-        fields = ['id', 'student', 'sponsor', 'money', 'date_created']
+        fields = ['id', 'student', 'money']
+
+    @staticmethod
+    def get_student(sponsorship):
+        data = {
+            'id': sponsorship.student.id,
+            'full_name': sponsorship.student.full_name
+        }
+        return data
 
 
 class DashboardMoneySerializer:
