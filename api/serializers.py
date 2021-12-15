@@ -4,7 +4,11 @@ from django.db.models import Sum, Count
 from django.db.models.functions import Coalesce
 from rest_framework.validators import ValidationError
 from django.shortcuts import get_object_or_404
-from .validators import validate_positive
+from .validators import (
+    validate_positive,
+    validate_sponsorship_money_on_update,
+    validate_sponsorship_money_on_create
+)
 
 
 class UniversitySerializer(serializers.ModelSerializer):
@@ -72,48 +76,32 @@ class SponsorshipSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sponsorship
-        fields = ['id', 'student', 'student_id', 'sponsor', 'sponsor_id', 'money']
+        fields = ['id', 'student', 'student_id', 'sponsor', 'sponsor_id', 'money', 'date_created']
         extra_kwargs = {'money': {'allow_null': False, 'required': True, 'validators': [validate_positive]}}
 
     def update(self, instance, validated_data):
-        sponsor = get_object_or_404(Sponsor, id=validated_data['sponsor_id'])
-        student = instance.student
-        money = validated_data['money']
-
-        sponsor_spent_money = \
-            sponsor.sponsorships.exclude(id=instance.id).aggregate(money_sum=Coalesce(Sum('money'), 0))['money_sum']
-        student_gained_money = \
-            student.sponsorships.exclude(id=instance.id).aggregate(money_sum=Coalesce(Sum('money'), 0))['money_sum']
-        sponsor_left_money = sponsor.money - sponsor_spent_money
-
-        if money <= sponsor_left_money:
-            if student_gained_money + money <= instance.student.contract:
-                instance.money = money
-                instance.sponsor = sponsor
-                instance.save()
-                return instance
-            else:
-                raise ValidationError({'money': 'Homiylik puli kontrakt miqdoridan oshib ketdi'})
-        else:
-            raise ValidationError({'money': 'Homiyda buncha pul mavjud emas.'})
+        instance = validate_sponsorship_money_on_update(instance, validated_data)
+        return instance
 
     def create(self, validated_data):
-        sponsor = get_object_or_404(Sponsor, id=validated_data.get('sponsor_id'))
-        student = get_object_or_404(Student, id=validated_data.get('student_id'))
-        money = validated_data.get('money')
+        instance = validate_sponsorship_money_on_create(validated_data)
+        return instance
 
-        sponsor_spent_money = sponsor.sponsorships.aggregate(money_sum=Coalesce(Sum('money'), 0))['money_sum']
-        student_gained_money = student.sponsorships.aggregate(money_sum=Coalesce(Sum('money'), 0))['money_sum']
-        sponsor_left_money = sponsor.money - sponsor_spent_money
 
-        if money <= sponsor_left_money:
-            if student_gained_money + money <= student.contract:
-                sponsorship = Sponsorship.objects.create(**validated_data)
-                return sponsorship
-            else:
-                raise ValidationError({'money': 'Homiylik puli kontrakt miqdoridan ochib ketdi'})
-        else:
-            raise ValidationError({'money': 'Homiyda buncha pul mavjud emas.'})
+class SponsorshipsByStudentSerializer(serializers.ModelSerializer):
+    sponsor = SponsorSerializer()
+
+    class Meta:
+        model = Sponsorship
+        fields = ['id', 'sponsor', 'student', 'money', 'date_created']
+
+
+class SponsorshipsBySponsorSerializer(serializers.ModelSerializer):
+    student = StudentSerializer()
+
+    class Meta:
+        model = Sponsorship
+        fields = ['id', 'student', 'sponsor', 'money', 'date_created']
 
 
 class DashboardMoneySerializer:
