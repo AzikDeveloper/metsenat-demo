@@ -69,7 +69,7 @@ class SponsorshipsByStudentView(generics.ListAPIView):
 
 
 class SponsorshipsBySponsorView(generics.ListAPIView):
-    permission_classes = [IsAdminUser]
+    # permission_classes = [IsAdminUser]
     serializer_class = serializers.SponsorshipsBySponsorSerializer
 
     def get_queryset(self):
