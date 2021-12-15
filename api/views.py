@@ -74,6 +74,6 @@ class DashboardView(APIView):
         dashboard_money_serializer = serializers.DashboardMoneySerializer()
         dashboard_graph_serializer = serializers.DashboardGraphSerializer()
         return Response(data={
-            'money_stats': dashboard_money_serializer.__dict__,
-            'graph_stats': dashboard_graph_serializer.__dict__
+            'money_stats': dashboard_money_serializer.data(),
+            'graph_stats': dashboard_graph_serializer.data()
         })

@@ -44,7 +44,7 @@ class SponsorSerializer(serializers.ModelSerializer):
 
 class StudentSerializer(serializers.ModelSerializer):
     university = UniversitySerializer(read_only=True)
-    university_id = serializers.IntegerField(allow_null=False, required=True)
+    university_id = serializers.IntegerField(allow_null=False, required=True, write_only=True)
     gained_money = serializers.SerializerMethodField()
 
     class Meta:
@@ -122,6 +122,9 @@ class DashboardMoneySerializer:
         self.total_contract_money = Student.objects.aggregate(Sum('contract'))['contract__sum']
         self.total_needed_money = self.total_contract_money - self.total_sponsored_money
 
+    def data(self):
+        return self.__dict__
+
 
 class DashboardGraphSerializer:
     def __init__(self):
@@ -131,3 +134,6 @@ class DashboardGraphSerializer:
         self.students_stats = Student.objects.extra({'date_created': "date(date_created)"}).values(
             'date_created').annotate(
             count=Count('id')).values_list('date_created', 'count')
+
+    def data(self):
+        return self.__dict__
