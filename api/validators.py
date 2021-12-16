@@ -24,7 +24,7 @@ def validate_sponsorship_money_on_update(instance, validated_data):
     sponsor_left_money = sponsor.money - sponsor_spent_money
 
     if money <= sponsor_left_money:
-        if student_gained_money + money <= instance.student.contract:
+        if student_gained_money + money <= student.contract:
             instance.money = money
             instance.sponsor = sponsor
             instance.save()
