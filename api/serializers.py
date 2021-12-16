@@ -126,6 +126,7 @@ class DashboardMoneySerializer:
         self.total_contract_money = Student.objects.aggregate(Sum('contract'))['contract__sum']
         self.total_needed_money = self.total_contract_money - self.total_sponsored_money
 
+    @property
     def data(self):
         return self.__dict__
 
@@ -139,5 +140,6 @@ class DashboardGraphSerializer:
             'date_created').annotate(
             count=Count('id')).values_list('date_created', 'count')
 
+    @property
     def data(self):
         return self.__dict__
