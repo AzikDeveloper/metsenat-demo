@@ -18,7 +18,7 @@ class SponsorView(generics.ListCreateAPIView):
     filter_backends = [DateRangeFilterBackend, SearchFilter, DjangoFilterBackend]
     search_fields = ['full_name', 'company_name']
     filterset_fields = ['money', 'status']
-    date_range_filter_field = 'date_created'
+    date_range_filter_fields = ['date_created']
 
 
 class SponsorDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -34,7 +34,7 @@ class StudentView(generics.ListCreateAPIView):
     filter_backends = [DateRangeFilterBackend, SearchFilter, DjangoFilterBackend]
     search_fields = ['full_name']
     filterset_fields = ['degree', 'university']
-    date_range_filter_field = 'date_created'
+    date_range_filter_fields = ['date_created']
 
 
 class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -49,7 +49,7 @@ class SponsorshipView(generics.ListCreateAPIView):
     serializer_class = serializers.SponsorshipSerializer
     filter_backends = [DateRangeFilterBackend, SearchFilter, DjangoFilterBackend]
     search_fields = ['sponsor__full_name', 'sponsor__company_name', 'student__full_name']
-    date_range_filter_field = 'date_created'
+    date_range_filter_fields = ['date_created']
 
 
 class SponsorshipDetailView(generics.RetrieveUpdateDestroyAPIView):

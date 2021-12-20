@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'site_auth.apps.SiteAuthConfig',
-    'api.apps.ApiConfig'
+    'api.apps.ApiConfig',
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 REST_FRAMEWORK = {
