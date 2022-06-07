@@ -1,12 +1,28 @@
-from django.urls import path
-from django.views.generic import TemplateView
-from rest_framework.schemas import get_schema_view
+from django.urls import path, include
 from .views import *
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+import debug_toolbar
+
+# SWAGGER CONFIG
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Metsenat API",
+        default_version="v1",
+        description="Metsenat API",
+        terms_of_service="",
+        contact=openapi.Contact(email="admin@metsenat-demo.uz"),
+        license=openapi.License(name="License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
     path('sponsors', SponsorView.as_view(), name='sponsors'),
     path('sponsors/<int:pk>', SponsorDetailView.as_view(), name='sponsor-detail'),
-    path('sponsors/<int:pk>/sponsorships', SponsorshipsBySponsorView.as_view(), 'sponsorships-by-sponsor'),
+    path('sponsors/<int:pk>/sponsorships', SponsorshipsBySponsorView.as_view(), name='sponsorships-by-sponsor'),
 
     path('students', StudentView.as_view(), name='students'),
     path('students/<int:pk>', StudentDetailView.as_view(), name='student-detail'),
@@ -22,12 +38,10 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path('swagger', TemplateView.as_view(template_name='api/swagger-ui.html',
-                                         extra_context={'schema_url': 'openapi-schema'}
-                                         ), name='swagger-ui'),
-    path('openapi', get_schema_view(
-        title="Metsenat",
-        description="API for students contract sponsorship",
-        version="1.0.0"
-    ), name='openapi-schema'),
+    path(
+        "swagger/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path("__debug__/", include(debug_toolbar.urls)),
 ]

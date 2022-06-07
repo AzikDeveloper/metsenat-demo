@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'site_auth.apps.SiteAuthConfig',
     'api.apps.ApiConfig',
-    'rest_framework_simplejwt.token_blacklist'
+    'rest_framework_simplejwt.token_blacklist',
+    'drf_yasg',
 ]
 
 REST_FRAMEWORK = {
